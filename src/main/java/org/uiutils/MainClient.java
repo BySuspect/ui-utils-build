@@ -37,6 +37,7 @@ public class MainClient implements ClientModInitializer {
     public static Color darkWhite;
 
     public static KeyBinding restoreScreenKey;
+    public static MinecraftClient mc;
 
     public static Logger LOGGER = LoggerFactory.getLogger("ui-utils");
 
@@ -46,6 +47,7 @@ public class MainClient implements ClientModInitializer {
         if (os.contains("mac") || os.contains("darwin") || os.contains("osx")) {
             SharedVariables.isMac = true;
         }
+        mc = MinecraftClient.getInstance();
 
         // register "restore screen" key
         restoreScreenKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("Restore Screen", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_V, "UI Utils"));
@@ -515,7 +517,7 @@ public class MainClient implements ClientModInitializer {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                MinecraftClient.getInstance().send(runnable);
+                mc.send(runnable);
             }
         };
         timer.schedule(task, delayMs);

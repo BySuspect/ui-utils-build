@@ -1,6 +1,5 @@
 package org.uiutils.mixin;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -36,8 +35,8 @@ public abstract class HandledScreenMixin extends Screen {
     @Nullable
     protected Slot focusedSlot;
 
-    @Unique
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    // @Unique
+    // private static final MinecraftClient MainClient.mc = MinecraftClient.getInstance();
 
     @Unique
     private TextFieldWidget addressField;
@@ -46,7 +45,7 @@ public abstract class HandledScreenMixin extends Screen {
     @Inject(at = @At("TAIL"), method = "init")
     public void init(CallbackInfo ci) {
         if (SharedVariables.enabled) {
-            MainClient.createWidgets(mc, this);
+            MainClient.createWidgets(MainClient.mc, this);
 
             // create chat box
             this.addressField = new TextFieldWidget(this.textRenderer, 5, 245, 160, 20, Text.of("Chat ...")) {
@@ -55,20 +54,20 @@ public abstract class HandledScreenMixin extends Screen {
                     if (keyCode == GLFW.GLFW_KEY_ENTER) {
                         if (this.getText().equals("^toggleuiutils")) {
                             SharedVariables.enabled = !SharedVariables.enabled;
-                            if (mc.player != null) {
-                                mc.player.sendMessage(Text.of("UI-Utils is now " + (SharedVariables.enabled ? "enabled" : "disabled") + "."));
+                            if (MainClient.mc.player != null) {
+                                MainClient.mc.player.sendMessage(Text.of("UI-Utils is now " + (SharedVariables.enabled ? "enabled" : "disabled") + "."));
                             }
                             return false;
                         }
 
-                        if (mc.getNetworkHandler() != null) {
+                        if (MainClient.mc.getNetworkHandler() != null) {
                             if (this.getText().startsWith("/")) {
-                                mc.getNetworkHandler().sendChatCommand(this.getText().replaceFirst(Pattern.quote("/"), ""));
+                                MainClient.mc.getNetworkHandler().sendChatCommand(this.getText().replaceFirst(Pattern.quote("/"), ""));
                             } else {
-                                mc.getNetworkHandler().sendChatMessage(this.getText());
+                                MainClient.mc.getNetworkHandler().sendChatMessage(this.getText());
                             }
                         } else {
-                            MainClient.LOGGER.warn("Minecraft network handler (mc.getNetworkHandler()) was null while trying to send chat message from UI Utils.");
+                            MainClient.LOGGER.warn("Minecraft network handler (MainClient.mc.getNetworkHandler()) was null while trying to send chat message from UI Utils.");
                         }
 
                         this.setText("");
@@ -88,15 +87,15 @@ public abstract class HandledScreenMixin extends Screen {
         cir.cancel();
         if (super.keyPressed(keyCode, scanCode, modifiers)) {
             cir.setReturnValue(true);
-        } else if (mc.options.inventoryKey.matchesKey(keyCode, scanCode) && !this.addressField.isSelected()) {
+        } else if (MainClient.mc.options.inventoryKey.matchesKey(keyCode, scanCode) && !this.addressField.isSelected()) {
             this.close();
             cir.setReturnValue(true);
         } else {
             this.handleHotbarKeyPressed(keyCode, scanCode);
             if (this.focusedSlot != null && this.focusedSlot.hasStack()) {
-                if (mc.options.pickItemKey.matchesKey(keyCode, scanCode)) {
+                if (MainClient.mc.options.pickItemKey.matchesKey(keyCode, scanCode)) {
                     this.onMouseClick(this.focusedSlot, this.focusedSlot.id, 0, SlotActionType.CLONE);
-                } else if (mc.options.dropKey.matchesKey(keyCode, scanCode)) {
+                } else if (MainClient.mc.options.dropKey.matchesKey(keyCode, scanCode)) {
                     this.onMouseClick(this.focusedSlot, this.focusedSlot.id, hasControlDown() ? 1 : 0, SlotActionType.THROW);
                 }
             }
@@ -110,7 +109,7 @@ public abstract class HandledScreenMixin extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         // display sync id, revision, and credit if ui utils is enabled
         if (SharedVariables.enabled) {
-            MainClient.createText(mc, context, this.textRenderer);
+            MainClient.createText(MainClient.mc, context, this.textRenderer);
         }
     }
 }

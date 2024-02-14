@@ -28,7 +28,7 @@ public abstract class ScreenMixin {
     @Shadow
     public abstract <T extends Element & Drawable & Selectable> T addDrawableChild(T drawableElement);
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    // private static final MinecraftClient MainClient.mc = MinecraftClient.getInstance();
 
     private TextFieldWidget addressField;
     private boolean initialized = false;
@@ -37,12 +37,12 @@ public abstract class ScreenMixin {
     @Inject(at = @At("TAIL"), method = "init(Lnet/minecraft/client/MinecraftClient;II)V")
     public void init(MinecraftClient client, int width, int height, CallbackInfo ci) {
         // check if the current gui is a lectern gui and if ui-utils is enabled
-        if (mc.currentScreen instanceof LecternScreen screen && SharedVariables.enabled) {
+        if (MainClient.mc.currentScreen instanceof LecternScreen screen && SharedVariables.enabled) {
             // setup widgets
             if (/*!this.initialized*/ true) {
                 // check if the current gui is a lectern gui and ui-utils is enabled
                 TextRenderer textRenderer = ((ScreenAccessor) this).getTextRenderer();
-                MainClient.createWidgets(mc, screen);
+                MainClient.createWidgets(MainClient.mc, screen);
 
                 // create chat box
                 this.addressField = new TextFieldWidget(textRenderer, 5, 245, 160, 20, Text.of("Chat ...")) {
@@ -51,20 +51,20 @@ public abstract class ScreenMixin {
                         if (keyCode == GLFW.GLFW_KEY_ENTER) {
                             if (this.getText().equals("^toggleuiutils")) {
                                 SharedVariables.enabled = !SharedVariables.enabled;
-                                if (mc.player != null) {
-                                    mc.player.sendMessage(Text.of("UI-Utils is now " + (SharedVariables.enabled ? "enabled" : "disabled") + "."));
+                                if (MainClient.mc.player != null) {
+                                    MainClient.mc.player.sendMessage(Text.of("UI-Utils is now " + (SharedVariables.enabled ? "enabled" : "disabled") + "."));
                                 }
                                 return false;
                             }
 
-                            if (mc.getNetworkHandler() != null) {
+                            if (MainClient.mc.getNetworkHandler() != null) {
                                 if (this.getText().startsWith("/")) {
-                                    mc.getNetworkHandler().sendChatCommand(this.getText().replaceFirst(Pattern.quote("/"), ""));
+                                    MainClient.mc.getNetworkHandler().sendChatCommand(this.getText().replaceFirst(Pattern.quote("/"), ""));
                                 } else {
-                                    mc.getNetworkHandler().sendChatMessage(this.getText());
+                                    MainClient.mc.getNetworkHandler().sendChatMessage(this.getText());
                                 }
                             } else {
-                                MainClient.LOGGER.warn("Minecraft network handler (mc.getNetworkHandler()) was null while trying to send chat message from UI Utils.");
+                                MainClient.LOGGER.warn("Minecraft network handler (MainClient.mc.getNetworkHandler()) was null while trying to send chat message from UI Utils.");
                             }
 
                             this.setText("");
@@ -84,8 +84,8 @@ public abstract class ScreenMixin {
     @Inject(at = @At("TAIL"), method = "render")
     public void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         // display sync id, revision, and credit if ui utils is enabled
-        if (SharedVariables.enabled && mc.player != null && mc.currentScreen instanceof LecternScreen) {
-            MainClient.createText(mc, context, ((ScreenAccessor) this).getTextRenderer());
+        if (SharedVariables.enabled && MainClient.mc.player != null && MainClient.mc.currentScreen instanceof LecternScreen) {
+            MainClient.createText(MainClient.mc, context, ((ScreenAccessor) this).getTextRenderer());
         }
     }
 }

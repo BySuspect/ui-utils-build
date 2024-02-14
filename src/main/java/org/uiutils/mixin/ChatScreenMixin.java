@@ -1,6 +1,5 @@
 package org.uiutils.mixin;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,13 +15,13 @@ public class ChatScreenMixin {
     public void sendMessage(String chatText, boolean addToHistory, CallbackInfoReturnable<Boolean> cir) {
         if (chatText.equals("^toggleuiutils")) {
             SharedVariables.enabled = !SharedVariables.enabled;
-            if (MinecraftClient.getInstance().player != null) {
-                MinecraftClient.getInstance().player.sendMessage(Text.of("UI-Utils is now " + (SharedVariables.enabled ? "enabled" : "disabled") + "."));
+            if (MainClient.mc.player != null) {
+                MainClient.mc.player.sendMessage(Text.of("UI-Utils is now " + (SharedVariables.enabled ? "enabled" : "disabled") + "."));
             } else {
                 MainClient.LOGGER.warn("Minecraft player was nulling while enabling / disabling UI Utils.");
             }
-            MinecraftClient.getInstance().inGameHud.getChatHud().addToMessageHistory(chatText);
-            MinecraftClient.getInstance().setScreen(null);
+            MainClient.mc.inGameHud.getChatHud().addToMessageHistory(chatText);
+            MainClient.mc.setScreen(null);
             cir.setReturnValue(false);
         }
     }

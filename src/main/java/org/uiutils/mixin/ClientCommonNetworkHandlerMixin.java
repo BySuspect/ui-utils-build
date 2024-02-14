@@ -26,8 +26,8 @@ public abstract class ClientCommonNetworkHandlerMixin {
     @Inject(at = @At("HEAD"), method = "onResourcePackSend", cancellable = true)
     public void onResourcePackSend(ResourcePackSendS2CPacket packet, CallbackInfo ci) {
         if (SharedVariables.bypassResourcePack && (packet.required() || SharedVariables.resourcePackForceDeny)) {
-            this.sendPacket(new ResourcePackStatusC2SPacket(MinecraftClient.getInstance().getSession().getUuidOrNull(), ResourcePackStatusC2SPacket.Status.ACCEPTED));
-            this.sendPacket(new ResourcePackStatusC2SPacket(MinecraftClient.getInstance().getSession().getUuidOrNull(), ResourcePackStatusC2SPacket.Status.SUCCESSFULLY_LOADED));
+            this.sendPacket(new ResourcePackStatusC2SPacket(MainClient.mc.getSession().getUuidOrNull(), ResourcePackStatusC2SPacket.Status.ACCEPTED));
+            this.sendPacket(new ResourcePackStatusC2SPacket(MainClient.mc.getSession().getUuidOrNull(), ResourcePackStatusC2SPacket.Status.SUCCESSFULLY_LOADED));
             MainClient.LOGGER.info(
                     "[UI Utils]: Required Resource Pack Bypassed, Message: " +
                             (packet.prompt() == null ? "<no message>" : packet.prompt().getString()) +
