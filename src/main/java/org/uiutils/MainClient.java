@@ -5,8 +5,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
@@ -30,7 +28,6 @@ import org.uiutils.mixin.accessor.ClientConnectionAccessor;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
-import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -78,7 +75,6 @@ public class MainClient implements ClientModInitializer {
         // display the current gui's sync id and revision
         textRenderer.draw(matrices, "Sync Id: " + mc.player.currentScreenHandler.syncId, 200, 5, Color.WHITE.getRGB());
         textRenderer.draw(matrices, "Revision: " + mc.player.currentScreenHandler.getRevision(), 200, 35, Color.WHITE.getRGB());
-        textRenderer.draw(matrices, "UI-Utils made by Coderx Gamer.", 10, mc.currentScreen.height - 30, Color.WHITE.getRGB());
     }
 
     // bro are you ever going to clean this up?
@@ -527,11 +523,5 @@ public class MainClient implements ClientModInitializer {
             }
         };
         timer.schedule(task, delayMs);
-    }
-
-    public static String getModVersion(String modId) {
-        ModMetadata modMetadata = FabricLoader.getInstance().getModContainer(modId).get().getMetadata();
-
-        return modMetadata.getVersion().getFriendlyString();
     }
 }
