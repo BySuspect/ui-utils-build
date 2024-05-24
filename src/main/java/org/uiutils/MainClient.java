@@ -9,11 +9,11 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ButtonClickC2SPacket;
@@ -45,8 +45,6 @@ public class MainClient implements ClientModInitializer {
     public static MinecraftClient mc = MinecraftClient.getInstance();
     @Override
     public void onInitializeClient() {
-        UpdateUtils.checkForUpdates();
-
         String os = System.getProperty("os.name").toLowerCase();
         if (os.contains("mac") || os.contains("darwin") || os.contains("osx")) {
             SharedVariables.isMac = true;
@@ -75,10 +73,12 @@ public class MainClient implements ClientModInitializer {
     }
 
     @SuppressWarnings("all")
-    public static void createText(MinecraftClient mc, DrawContext context, TextRenderer textRenderer) {
-        // display the current gui's sync id, revision
-        context.drawText(textRenderer, "Sync Id: " + mc.player.currentScreenHandler.syncId, 200, 5, Color.WHITE.getRGB(), false);
-        context.drawText(textRenderer, "Revision: " + mc.player.currentScreenHandler.getRevision(), 200, 35, Color.WHITE.getRGB(), false);
+    public static void renderHandledScreen(MinecraftClient mc, TextRenderer textRenderer, MatrixStack matrices) {
+
+        // display the current gui's sync id and revision
+        textRenderer.draw(matrices, "Sync Id: " + mc.player.currentScreenHandler.syncId, 200, 5, Color.WHITE.getRGB());
+        textRenderer.draw(matrices, "Revision: " + mc.player.currentScreenHandler.getRevision(), 200, 35, Color.WHITE.getRGB());
+        textRenderer.draw(matrices, "UI-Utils made by Coderx Gamer.", 10, mc.currentScreen.height - 30, Color.WHITE.getRGB());
     }
 
     // bro are you ever going to clean this up?
@@ -453,7 +453,7 @@ public class MainClient implements ClientModInitializer {
                 if (mc.currentScreen == null) {
                     throw new IllegalStateException("The current minecraft screen (mc.currentScreen) is null");
                 }
-                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(Text.Serialization.toJsonString(mc.currentScreen.getTitle(), Objects.requireNonNull(MinecraftClient.getInstance().getServer()).getRegistryManager())), null);
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(Text.Serializer.toJson(mc.currentScreen.getTitle())), null);
             } catch (IllegalStateException e) {
                 LOGGER.error("Error while copying title JSON to clipboard", e);
             }

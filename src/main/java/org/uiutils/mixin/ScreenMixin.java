@@ -2,13 +2,13 @@ package org.uiutils.mixin;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.LecternScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,6 +28,7 @@ public abstract class ScreenMixin {
     @Shadow
     public abstract <T extends Element & Drawable & Selectable> T addDrawableChild(T drawableElement);
 
+    @Shadow protected TextRenderer textRenderer;
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     private TextFieldWidget addressField;
@@ -86,10 +87,10 @@ public abstract class ScreenMixin {
     }
 
     @Inject(at = @At("TAIL"), method = "render")
-    public void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         // display sync id, revision, if ui utils is enabled
         if (SharedVariables.enabled && mc.player != null && mc.currentScreen instanceof LecternScreen) {
-            MainClient.createText(mc, context, ((ScreenAccessor) this).getTextRenderer());
+            MainClient.renderHandledScreen(mc, textRenderer, matrices);
         }
     }
 }

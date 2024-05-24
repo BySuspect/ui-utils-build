@@ -1,10 +1,10 @@
 package org.uiutils.mixin;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
@@ -108,12 +108,12 @@ public abstract class HandledScreenMixin extends Screen {
 
     // inject at the end of the render method
     @Inject(at = @At("TAIL"), method = "render")
-    public void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         // display sync id, revision, if ui utils is enabled
         // this hurts me physically to look at this in a render method :(
         // im too lazy to fix it tho :D
         if (SharedVariables.enabled) {
-            MainClient.createText(mc, context, this.textRenderer);
+            MainClient.renderHandledScreen(mc, textRenderer, matrices);
         }
     }
 }
