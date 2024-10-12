@@ -1,0 +1,83 @@
+name: Build and Release
+
+on:
+    workflow_dispatch:
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        env:
+            BUILD_VERSION: "2.0.0"
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+              with:
+                  ref: v${{ env.BUILD_VERSION }}
+
+            - name: Set up JDK 17
+              uses: actions/setup-java@v3
+              with:
+                  distribution: "temurin"
+                  java-version: "17"
+
+            - name: Set up Gradle
+              uses: gradle/gradle-build-action@v2
+
+            - name: Build the mod
+              run: ./gradlew build
+
+            - name: List JAR files
+              run: |
+                  echo "Listing jar files in build/libs:"
+                  ls build/libs/*.jar
+
+            - name: Create new tag
+              run: |
+                  git config --global user.name "GitHub Actions"
+                  git config --global user.email "actions@github.com"
+                  new_tag="v${{ env.BUILD_VERSION }}-build"
+                  git tag $new_tag
+                  git push origin $new_tag
+
+            - name: Create GitHub Release for new tag
+              id: create_release
+              uses: actions/create-release@v1
+              with:
+                  tag_name: "v${{ env.BUILD_VERSION }}-build"
+                  release_name: "Release v${{ env.BUILD_VERSION }}-build"
+                  draft: false
+                  prerelease: false
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Upload JAR - All JAR
+              uses: actions/upload-release-asset@v1
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: build/libs/ui-utils-${{ env.BUILD_VERSION }}-all.jar
+                  asset_name: ui-utils-${{ env.BUILD_VERSION }}-all.jar
+                  asset_content_type: application/java-archive
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Upload JAR - Sources
+              uses: actions/upload-release-asset@v1
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: build/libs/ui-utils-${{ env.BUILD_VERSION }}-sources.jar
+                  asset_name: ui-utils-${{ env.BUILD_VERSION }}-sources.jar
+                  asset_content_type: application/java-archive
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Upload JAR - Main
+              uses: actions/upload-release-asset@v1
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: build/libs/ui-utils-${{ env.BUILD_VERSION }}.jar
+                  asset_name: ui-utils-${{ env.BUILD_VERSION }}.jar
+                  asset_content_type: application/java-archive
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
